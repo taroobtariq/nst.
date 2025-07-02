@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIESEC NST Application - Taroob Tariq</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #F0F4F8; 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+        }
+        
+       .container {
+            background-color: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            padding: 2rem;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+       .card {
+            background-color: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+       .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px -8px rgba(0, 0, 0, 0.12);
+        }
+        
+        h1, h2, h3 {
+            font-weight: 700;
+        }
+
+       .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+
+        @media (min-width: 768px) {
+           .chart-container {
+                height: 350px;
+            }
+        }
+        
+       .flowchart-node {
+            border: 2px solid;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+            position: relative;
+        }
+
+       .flowchart-arrow {
+            position: absolute;
+            font-size: 2.5rem;
+            line-height: 1;
+            color: #1A56DB; 
+        }
+
+       .venn-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 1rem;
+            font-weight: 600;
+            color: white;
+            position: absolute;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+       .page {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+       .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+       .nav-item {
+            cursor: pointer;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.75rem;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            font-weight: 600;
+            color: #E0E0E0;
+            white-space: nowrap; /* Prevent wrapping for nav items */
+        }
+
+       .nav-item.active {
+            background-color: white;
+            color: #0B4F6C;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+       .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+       .nav-container {
+            background-color: #0B4F6C;
+            border-radius: 1.5rem;
+            padding: 0.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        /* Table specific styles for content calendar */
+       .content-calendar-table th,.content-calendar-table td {
+            padding: 0.75rem;
+            border: 1px solid #E5E7EB; /* gray-200 */
+            text-align: left;
+            vertical-align: top;
+        }
+       .content-calendar-table th {
+            background-color: #F3F4F6; /* gray-100 */
+            font-weight: 600;
+            color: #374151; /* gray-700 */
+        }
+       .content-calendar-table tbody tr:nth-child(even) {
+            background-color: #F9FAFB; /* gray-50 */
+        }
+       .content-calendar-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem; /* text-sm */
+        }
+       .accordion-header {
+            cursor: pointer;
+            padding: 1rem;
+            background-color: #e5e7eb; /* bg-gray-200 */
+            border-radius: 0.5rem; /* rounded-lg */
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+       .accordion-content {
+            padding: 1rem;
+            background-color: #f9fafb; /* bg-gray-50 */
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            display: none;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            max-height: 0;
+        }
+       .accordion-content.active {
+            display: block;
+            max-height: 500px; /* Arbitrary large value for smooth transition */
+        }
+        /* Calendar specific dropdown styles */
+        .day-details-toggle {
+            background: none;
+            border: none;
+            color: #1A56DB;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 0.5rem;
+            font-size: 1.25rem;
+            line-height: 1;
+            transform: rotate(0deg);
+            transition: transform 0.2s ease-in-out;
+        }
+        .day-details-toggle.rotated {
+            transform: rotate(90deg);
+        }
+        .day-details-content {
+            display: none;
+            padding-top: 0.5rem;
+            border-top: 1px solid #E5E7EB;
+            margin-top: 0.5rem;
+        }
+        .day-details-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-8">
+
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-6xl font-bold text-[#0B4F6C]">Taroob Tariq</h1>
+            <p class="text-xl md:text-2xl text-[#1A56DB] mt-2">NST Social Media & Community Manager Application</p>
+            <p class="text-md text-gray-600 mt-1">taroob.tariq01@aiesec.com</p>
+        </header>
+
+        <nav class="nav-container">
+            <div class="nav-item active" data-page="home">Home</div>
+            <div class="nav-item" data-page="profile">Profile</div>
+            <div class="nav-item" data-page="q1">Q1: AIESEC Def.</div>
+            <div class="nav-item" data-page="q2">Q2: Expectations</div>
+            <div class="nav-item" data-page="q3">Q3: Alignment</div>
+            <div class="nav-item" data-page="q4q5">Q4 & Q5: Traits & Challenge</div>
+            <div class="nav-item" data-page="q6">Q6: Content Calendar</div>
+            <div class="nav-item" data-page="q7">Q7: Content System</div>
+            <div class="nav-item" data-page="q8">Q8: Insta Comments</div>
+        </nav>
+
+        <main id="pages-container">
+
+            <section id="home-page" class="page active">
+                <div class="card text-center py-12">
+                    
+                    <h2 class="text-3xl md:text-4xl text-[#0B4F6C] mb-2">Hi, I am Taroob Tariq!</h2>
+                    <p class="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+                        A rising senior at IBA, exploring my journey, insights, and vision for the NST Social Media & Community Manager role within AIESEC in Pakistan. Click through the navigation above to discover more!
+                    </p>
+                    <button onclick="showPage('profile')" class="bg-[#1A56DB] text-white px-8 py-4 rounded-full text-xl font-semibold shadow-lg hover:bg-[#26A69A] transition-colors duration-300">
+                        Start Exploring &rarr;
+                    </button>
+                </div>
+            </section>
+
+            <section id="profile-page" class="page">
+                <div class="card">
+                    <h2 class="text-3xl mb-6 text-center text-[#0B4F6C]">Applicant Profile</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                        <div class="bg-gray-50 p-4 rounded-xl">
+                            <div class="text-4xl mb-2">🎓</div>
+                            <h3 class="font-semibold text-lg">Home LC</h3>
+                            <p class="text-gray-600">AIESEC in IBA</p>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-xl">
+                            <div class="text-4xl mb-2">🗓️</div>
+                            <h3 class="font-semibold text-lg">Induction Year</h3>
+                            <p class="text-gray-600">2024</p>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-xl lg:col-span-2">
+                            <div class="text-4xl mb-2">💼</div>
+                            <h3 class="font-semibold text-lg">Previous Roles</h3>
+                            <p class="text-gray-600">NST FnL Creatives, TLD iCX, EP Buddy, Team Member BD</p>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-xl">
+                            <div class="text-4xl mb-2">🏆</div>
+                            <h3 class="font-semibold text-lg">Conferences</h3>
+                            <p class="text-gray-600">NSC'24 & NPS'24</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-between mt-8">
+                    <button onclick="showPage('home')" class="bg-[#EF5350] text-white px-6 py-3 rounded-full font-semibold shadow-md hover:opacity-90 transition-opacity duration-300">
+                        &larr; Back
+                    </button>
+                    <button onclick="showPage('q1')" class="bg-[#1A56DB] text-white px-6 py-3 rounded-full font-semibold shadow-md hover:opacity-90 transition-opacity duration-300">
+                        Next: Q1 &rarr;
+                    </button>
+                </div>
+            </section>
+
+            <section id="q1-page" class="page">
+                <div class="card">
+                    <h2 class="text-3xl mb-6 text-[#0B4F6C] text-center">Q1: My Definition of AIESEC</h2>
+                    <p class="mb-8 text-gray-600 text-center">For me, AIESEC is the powerful intersection of three core pillars. It's not just an organization; it's a dynamic ecosystem for growth.</p>
+                    <div class="relative h-80 flex items-center justify-center">
+                        <div class="venn-circle bg-[#26A69A]" style="top: 10%; left: 35%; transform: translateX(-50%);">Youth Leadership</div>
+                        <div class="venn-circle bg-[#1A56DB]" style="top: 40%; left: 20%; transform: translateX(-50%);">Global Impact</div>
+                        <div class="venn-circle bg-[#EF5350]" style="top: 40%; left: 50%; transform: translateX(-50%);">Personal Growth</div>
+                        <div class="absolute text-center font-bold text-xl text-[#0B4F6C]" style="top: 45%; left: 35%; transform: translate(-50%, -50%);">AIESEC</div>
+                    </div>
+                    <p class="mt-8 text-gray-600">AIESEC is a youth-led movement that develops leadership by facilitating cross-cultural understanding and creating a tangible global impact. It's a platform where my personal aspirations for growth align perfectly with a collective mission to better the world.</p>
+                </div>
+                <div class="flex justify-between mt-8">
+                    <button onclick="showPage('profile')" class="bg-[#EF5350] text-white px-6 py-3 rounded-full font-semibold shadow-md hover:opacity-90 transition-opacity duration-300">
+                        &larr; Back
+                    </button>
+                    <button onclick="showPage('q2')" class="bg-[#1A56DB] text-white px-6 py-3 rounded-full font-semibold shadow-md hover:opacity-90 transition-opacity duration-300">
+                        Next: Q2 &rarr;
+                    </button>
+                </div>
+            </section>
+            
+            <section id="q2-page" class="page">
+                <div class="card">
+                    <h2 class="text-3xl mb-6 text-[#0B4F6C] text-center">Q2: NST Role Expectations</h2>
+                    <p class="mb-8 text-gray-600 text-center">I see the NST role as a collaborative journey with clear expectations for mutual growth and success, both with my direct leader and the wider national team.</p>
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="font-semibold text-xl text-[#1A56DB] mb-2">From the MCVP Marketing:</h3>
+                            <ul class="list-disc list-inside text-gray-600 space-y-1">
+                                <li>Strategic guidance and clear vision.</li>
+                                <li>Mentorship for personal & professional development.</li>
+                                <li>Constructive feedback to foster growth.</li>
+                                <li>Empowerment to take initiative and innovate.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-xl text-[#26A69A] mb-2">From the National Commission:</h3>
+                            <ul class="list-disc list-inside text-gray-600 space-y-1">
+                                <li>A collaborative and supportive community.</li>
+                                <li>Opportunities for cross-functional projects.</li>
+                                <li>Shared learning and knowledge exchange.</li>
+                                <li>A unified effort towards national goals.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-between mt-8">
+                    <button onclick="showPage('q1')" class="bg-[#EF5350] text-white px-6 py-3 rounded-full font-semibold shadow-md hover:opacity-90 transition-opacity duration-300">
+                        &larr; Back
+                    </button>
+                    <button onclick="showPage('q3')" class="bg-[#1A56DB] text-white px-6 py-3 rounded-full font-semibold shadow-md hover:opacity-90 transition-opacity duration-300">
+                        Next: Q3 &rarr;
+                    </button>
+                </div>
+            </section>
+
+            <section id="q3-page" class="page">
+                <div class="card">
+                    <h2 class="text-3xl mb-6 text-center text-[#0B4F6C]">Q3: Alignment with My Journey</h2>
+                    <p class="text-gray-600 text-center mb-8">This NST role is a pivotal step that bridges my AIESEC development with my future professional career, creating a powerful synergy for growth.</p>
+                    <div class="chart-container">
+                        <canvas id="journeyAlignmentChart"></canvas>
+                    </div>
+                    <p class="text-gray-600 mt-8">My AIESEC journey has provided foundational experiences. This role as Social Media & Community Manager will build upon that, offering specialized skills in digital marketing, content strategy, and brand management. These are not just AIESEC skills; they are high-demand competencies that will provide a significant competitive advantage in my professional career, allowing me to enter the workforce with proven experience in leading impactful digital campaigns.</p>
+                </div>
+                <div class="flex justify-between mt-8">
+                    <button onclick="showPage('q2')" class="bg-[#EF5350] text-white px-6 py-3 rounded-full font-semibold shadow-md hover:opacity-90 transition-opacity duration-300">
+                        &larr; Back
+                    </button>
+                    <button onclick="showPage('q4q5')" class="bg-[#1A56DB] text-white px-6 py-3 rounded-full font-semibold shadow-md hover:opacity-90 transition-opacity duration-300">
+                        Next: Q4 & Q5 &rarr;
+                    </button>
+                </div>
+            </section>
+
+            <section id="q4q5-page" class="page">
+                <div class="card mb-8">
+                    <h2 class="text-3xl mb-4 text-[#0B4F6C] text-center">Q4: Most Important Workplace Trait</h2>
+                    <div class="text-7xl font-bold text-[#EF5350] my-6 text-center">Adaptability</div>
+                    <p class="text-gray-600 text-center">In today's fast-paced world, the ability to adapt to new challenges, technologies, and team dynamics is paramount. An adaptable individual doesn't just survive change; they thrive on it, turning potential disruptions into opportunities for innovation and growth. It's the foundation of resilience and continuous improvement.</p>
+                </div>
+                <div class="card">
+                    <h2 class="text-3xl mb-6 text-center text-[#0B4F6C]">Q5: Tackling a Challenge (STAR Method)</h2>
+                    <div class="relative flex flex-col items-center justify-center space-y-8 md:space-y-0 md:flex-row md:space-x-8 md:items-stretch">
+                        <div class="flowchart-node border-[#1A56DB] md:w-1/4">
+                            <h3 class="font-bold text-xl text-[#1A56DB]">Situation</h3>
+                            <p class="text-sm text-gray-600 mt-2">Faced with a sudden budget cut for a university event I was co-organizing.</p>
+                            <div class="flowchart-arrow right-[-2.5rem] top-1/2 -translate-y-1/2 hidden md:block">➔</div>
+                            <div class="flowchart-arrow bottom-[-2.5rem] left-1/2 -translate-x-1/2 md:hidden">➔</div>
+                        </div>
+                        <div class="flowchart-node border-[#26A69A] md:w-1/4">
+                            <h3 class="font-bold text-xl text-[#26A69A]">Task</h3>
+                            <p class="text-sm text-gray-600 mt-2">Deliver a high-quality event experience without compromising key elements, despite the reduced funds.</p>
+                             <div class="flowchart-arrow right-[-2.5rem] top-1/2 -translate-y-1/2 hidden md:block">➔</div>
+                             <div class="flowchart-arrow bottom-[-2.5rem] left-1/2 -translate-x-1/2 md:hidden">➔</div>
+                        </div>
+                        <div class="flowchart-node border-[#EF5350] md:w-1/4">
+                            <h3 class="font-bold text-xl text-[#EF5350]">Action</h3>
+                            <p class="text-sm text-gray-600 mt-2">Immediately re-strategized. I negotiated with vendors and secured in-kind sponsorships from local businesses.</p>
+                             <div class="flowchart-arrow right-[-2.5rem] top-1/2 -translate-y-1/2 hidden md:block">➔</div>
+                             <div class="flowchart-arrow bottom-[-2.5rem] left-1/2 -translate-x-1/2 md:hidden">➔</div>
+                        </div>
+                        <div class="flowchart-node border-yellow-500 md:w-1/4">
+                            <h3 class="font-bold text-xl text-yellow-500">Result</h3>
+                            <p class="text-sm text-gray-600 mt-2">The event was a success, meeting budget constraints and receiving positive feedback. I learned the power of creative problem-solving and resourcefulness under pressure.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-between mt-8">
+                    <button onclick="showPage('q3')" class="bg-[#EF5350] text-white px-6 py-3 rounded-full font-semibold shadow-md hover:opacity-90 transition-opacity duration-300">
+                        &larr; Back
+                    </button>
+                    <button onclick="showPage('q6')" class="bg-[#1A56DB] text-white px-6 py-3 rounded-full font-semibold shadow-md hover:opacity-90 transition-opacity duration-300">
+                        Next: Q6 &rarr;
+                    </button>
+                </div>
+            </section>
+
+            <section id="q6-page" class="page">
+                <div class="card">
+                    <h2 class="text-3xl mb-6 text-center text-[#0B4F6C]">Q6: 14-Day Global Volunteer Instagram Content Calendar</h2>
+                    <p class="text-gray-600 text-center mb-8">This calendar promotes Global Volunteer, targeting Gen Z and young millennials in Pakistan. It focuses on awareness, consideration, and conversion, aligning with AIESEC's mission and local relevance.</p>
+                    <div class="overflow-x-auto rounded-xl shadow-md">
+                        <table class="content-calendar-table">
+                            <thead>
+                                <tr>
+                                    <th>Day</th>
+                                    <th>Details</th>
+                                    <th>Goal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>**Day 1** <button class="day-details-toggle text-[#1A56DB] text-xl ml-2">&rsaquo;</button></td>
+                                    <td>
+                                        <div class="day-details-content">
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Main Feed Post:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> Reel</p>
+                                            <p class="text-sm"><strong>Concept:</strong> "The Global Volunteer Vibe Check"</p>
+                                            <p class="text-sm"><strong>Visual:</strong> Energetic montage of diverse GV experiences (teaching, environment, cultural immersion).</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Ready to go beyond your comfort zone and make an impact that truly matters? 🇵🇰🤝🌍 Global Volunteer is your ticket to a world of purpose, growth, and unforgettable memories! #AIESECinPakistan #GlobalVolunteer #MakeAnImpact #YouthLeadership #TravelWithPurpose"</p>
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Story 1:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> Poll</p>
+                                            <p class="text-sm"><strong>Concept:</b> "What's your dream volunteer cause?"</p>
+                                            <p class="text-sm"><strong>Visual:</b> Engaging graphic with poll options, AIESEC branding.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Curious about what you can do? Vote for your passion!"</p>
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Story 2:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> Q&A Sticker</p>
+                                            <p class="text-sm"><strong>Concept:</strong> "Ask us anything about Global Volunteer!"</p>
+                                            <p class="text-sm"><strong>Visual:</strong> Friendly, approachable visual of an AIESEC member.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Thinking about volunteering abroad? Drop your questions here 👇"</p>
+                                        </div>
+                                    </td>
+                                    <td>Awareness & Consideration<br>Awareness & Engagement<br>Consideration & Engagement</td>
+                                </tr>
+                                <tr>
+                                    <td>**Day 2** <button class="day-details-toggle text-[#1A56DB] text-xl ml-2">&rsaquo;</button></td>
+                                    <td>
+                                        <div class="day-details-content">
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Main Feed Post:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> Carousel</p>
+                                            <p class="text-sm"><strong>Concept:<b> "Meet Our Global Volunteers"</p>
+                                            <p class="text-sm"><strong>Visual:</b> 3-4 testimonials from Pakistani youth, high-quality photos in host country.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "From Karachi to Kenya, Lahore to Latin America! ✨ Our Pakistani youth are making waves across the globe with #GlobalVolunteer. Swipe to hear their incredible stories of impact and transformation! Are YOU next? ➡️ Apply now via link in bio! #AIESECStories #YouthEmpowerment #VolunteerAbroad #PakistanYouth"</p>
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Story 1:</h4>
+                                            <p class="text-sm"><strong>Type:<b> Behind-the-Scenes</p>
+                                            <p class="text-sm"><strong>Concept:</strong> "Packing essentials for your Global Volunteer journey!"</p>
+                                            <p class="text-sm"><strong>Visual:</b> Fun, dynamic video of packing travel essentials and AIESEC merch.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Sunscreen, comfortable shoes, and a whole lot of courage! What's in your volunteer toolkit? 🎒"</p>
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Story 2:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> Link Sticker</p>
+                                            <p class="text-sm"><strong>Concept:<b> "Explore Global Volunteer opportunities"</p>
+                                            <p class="text-sm"><strong>Visual:</b> Visually appealing graphic with a clear "Learn More" button.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Your adventure starts here! Find your perfect volunteer project."</p>
+                                        </div>
+                                    </td>
+                                    <td>Consideration & Conversion<br>Consideration & Engagement<br>Conversion</td>
+                                </tr>
+                                <tr>
+                                    <td>**Day 3** <button class="day-details-toggle text-[#1A56DB] text-xl ml-2">&rsaquo;</button></td>
+                                    <td>
+                                        <div class="day-details-content">
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Main Feed Post:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> Static Image</p>
+                                            <p class="text-sm"><strong>Concept:</strong> "The Power of SDG Alignment"</p>
+                                            <p class="text-sm"><strong>Visual:</b> Clean, modern infographic design using AIESEC colors and SDG icons (e.g., Quality Education, Climate Action).</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Did you know every #GlobalVolunteer experience contributes to the UN Sustainable Development Goals? 🌍 Join us in building a better world, one project at a time. Which SDG are you passionate about? Let us know in the comments! 👇 #SDGs #SustainableDevelopment #AIESECGlobalImpact #VolunteerForGood"</p>
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Story 1:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> "This or That" Poll</p>
+                                            <p class="text-sm"><strong>Concept:<b> "Travel for leisure or Travel for impact?"</p>
+                                            <p class="text-sm"><strong>Visual:</b> Fun, contrasting visuals.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Which travel style calls to you? 🤔"</p>
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Story 2:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> Swipe Up for Info</p>
+                                            <p class="text-sm"><strong>Concept:<b> "Deep dive into SDGs and Global Volunteer."</p>
+                                            <p class="text-sm"><strong>Visual:</b> Engaging text overlay on a relevant image.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Want to know more about how GV aligns with SDGs? Swipe up!"</p>
+                                        </div>
+                                    </td>
+                                    <td>Awareness & Education<br>Awareness & Engagement<br>Consideration</td>
+                                </tr>
+                                <tr>
+                                    <td>**Day 4** <button class="day-details-toggle text-[#1A56DB] text-xl ml-2">&rsaquo;</button></td>
+                                    <td>
+                                        <div class="day-details-content">
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Main Feed Post:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> Reel</p>
+                                            <p class="text-sm"><strong>Concept:</strong> "A Day in the Life of a Global Volunteer"</p>
+                                            <p class="text-sm"><strong>Visual:</strong> POV style video showing a typical day (project work, cultural activity, reflection).</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Ever wondered what it's *really* like to be a #GlobalVolunteer? From impactful project work to exciting cultural adventures, every day is a new discovery. 🌟 Ready to write your own adventure? Link in bio! #VolunteerLife #CulturalExchange #AdventureTime #AIESECExperiences"</p>
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Story 1:</h4>
+                                            <p class="text-sm"><strong>Type:<b> Behind-the-Scenes</p>
+                                            <p class="text-sm"><strong>Concept:</strong> "Meet our AIESEC team ready to support your journey!"</p>
+                                            <p class="text-sm"><strong>Visual:</b> Casual, friendly video of the AIESEC Pakistan GV team.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "We're here to guide you every step of the way! 👋 #AIESECFamily"</p>
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Story 2:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> Countdown Sticker</p>
+                                            <p class="text-sm"><strong>Concept:<b> "Applications close in X days!"</p>
+                                            <p class="text-sm"><strong>Visual:</b> Clear, urgent call to action.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Don't miss your chance! Apply for Global Volunteer now!"</p>
+                                        </div>
+                                    </td>
+                                    <td>Consideration<br>Consideration & Trust<br>Conversion</td>
+                                </tr>
+                                <tr>
+                                    <td>**Day 5** <button class="day-details-toggle text-[#1A56DB] text-xl ml-2">&rsaquo;</button></td>
+                                    <td>
+                                        <div class="day-details-content">
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Main Feed Post:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> Static Image</p>
+                                            <p class="text-sm"><strong>Concept:<b> "Is Global Volunteer Right for You?"</p>
+                                            <p class="text-sm"><strong>Visual:</b> Visually appealing checklist highlighting key benefits (leadership, cross-cultural, network).</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Are you ready to unlock your leadership potential, immerse yourself in new cultures, and build a global network? 💡 #GlobalVolunteer offers all this and more! Check if it's your next big step! 👇 #PersonalGrowth #LeadershipSkills #CrossCultural #AIESECPakistan"</p>
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Story 1:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> Quiz</p>
+                                            <p class="text-sm"><strong>Concept:<b> "What kind of Global Volunteer are you?"</p>
+                                            <p class="text-sm"><strong>Visual:</b> Interactive quiz leading to different GV project types.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Discover your volunteer superpower! ✨ Take our quick quiz."</p>
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Story 2:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> Testimonial Quote</p>
+                                            <p class="text-sm"><strong>Concept:<b> Short, impactful quote from a past volunteer.</p>
+                                            <p class="text-sm"><strong>Visual:</b> Beautiful photo of the volunteer with their quote overlaid.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> " 'Global Volunteer changed my perspective on everything.' - [Volunteer Name]"</p>
+                                        </div>
+                                    </td>
+                                    <td>Consideration<br>Engagement & Consideration<br>Consideration</td>
+                                </tr>
+                                <tr>
+                                    <td>**Day 6** <button class="day-details-toggle text-[#1A56DB] text-xl ml-2">&rsaquo;</button></td>
+                                    <td>
+                                        <div class="day-details-content">
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Main Feed Post:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> Reel</p>
+                                            <p class="text-sm"><strong>Concept:<b> "Culture Shock? More Like Culture Rock!"</p>
+                                            <p class="text-sm"><strong>Visual:</b> Humorous reel addressing fears about cultural differences, showing how GV embraces them.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Embrace the new, learn from the unfamiliar, and turn 'culture shock' into 'culture rock'! 🤩 #GlobalVolunteer isn't just about giving back, it's about growing through cultural immersion. #CulturalExchange #NewExperiences #AIESECFun #TravelSmart"</p>
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Story 1:</h4>
+                                            <p class="text-sm"><strong>Type:<b> Quick Tip</p>
+                                            <p class="text-sm"><strong>Concept:<b> "How to prepare for your Global Volunteer interview."</p>
+                                            <p class="text-sm"><strong>Visual:</b> Text overlay on a branded background.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Nail that interview! Here's a pro tip from our team. 😉"</p>
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Story 2:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> CTA with Link Sticker</p>
+                                            <p class="text-sm"><strong>Concept:<b> "Ready to start your journey?"</p>
+                                            <p class="text-sm"><strong>Visual:</b> Inspiring visual with a direct call to action.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Click here to apply for Global Volunteer!"</p>
+                                        </div>
+                                    </td>
+                                    <td>Consideration & Awareness<br>Consideration & Conversion<br>Conversion</td>
+                                </tr>
+                                <tr>
+                                    <td>**Day 7** <button class="day-details-toggle text-[#1A56DB] text-xl ml-2">&rsaquo;</button></td>
+                                    <td>
+                                        <div class="day-details-content">
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Main Feed Post:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> Static Image</p>
+                                            <p class="text-sm"><strong>Concept:<b> "Partner Highlight:"</p>
+                                            <p class="text-sm"><strong>Visual:</b> High-quality image of the NGO's work or a representative photo.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Ever wondered where your #GlobalVolunteer impact goes? We partner with incredible organizations globally, like, to create tangible change. Your contribution directly supports their mission! Learn more about our partners via link in bio. #CommunityImpact #PartnershipsForGoals #AIESECNetwork"</p>
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Story 1:</h4>
+                                            <p class="text-sm"><strong>Type:<b> Behind-the-Scenes</p>
+                                            <p class="text-sm"><strong>Concept:<b> "A day at a local AIESEC office in Pakistan"</p>
+                                            <p class="text-sm"><strong>Visual:</b> Short video of AIESEC members working on GV exchanges.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Sending our volunteers off with love and support! ❤️"</p>
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Story 2:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> Testimonial Video Snippet</p>
+                                            <p class="text-sm"><strong>Concept:<b> Short video testimonial from a returning Global Volunteer.</p>
+                                            <p class="text-sm"><strong>Visual:</b> Raw, authentic video of a volunteer speaking.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Hear it from someone who's been there!"</p>
+                                        </div>
+                                    </td>
+                                    <td>Consideration<br>Consideration & Trust<br>Consideration & Conversion</td>
+                                </tr>
+                                <tr>
+                                    <td>**Day 8** <button class="day-details-toggle text-[#1A56DB] text-xl ml-2">&rsaquo;</button></td>
+                                    <td>
+                                        <div class="day-details-content">
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Main Feed Post:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> Carousel</p>
+                                            <p class="text-sm"><strong>Concept:<b> "Destinations Spotlight: [3-4 Countries]"</p>
+                                            <p class="text-sm"><strong>Visual:</b> High-quality, vibrant images of each country's landmarks or volunteer activities.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Dreaming of exploring new horizons? ✈️ From the bustling streets of [Country 1] to the serene landscapes of [Country 2], #GlobalVolunteer takes you places! Discover our top destinations and find your next adventure. Swipe to explore! ➡️ #TravelDreams #ExploreTheWorld #AIESECAdventures"</p>
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Story 1:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> Poll</p>
+                                            <p class="text-sm"><strong>Concept:<b> "Which destination are you most excited to explore?"</p>
+                                            <p class="text-sm"><strong>Visual:</b> Engaging graphic with poll options.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Where will your GV journey take you? Vote now!"</p>
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Story 2:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> Q&A Sticker</p>
+                                            <p class="text-sm"><strong>Concept:<b> "Ask us about specific destinations!"</p>
+                                            <p class="text-sm"><strong>Visual:</b> Fun, travel-themed visual.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Got a country in mind? Let us know! 🗺️"</p>
+                                        </div>
+                                    </td>
+                                    <td>Awareness & Consideration<br>Engagement & Consideration<br>Consideration & Engagement</td>
+                                </tr>
+                                <tr>
+                                    <td>**Day 9** <button class="day-details-toggle text-[#1A56DB] text-xl ml-2">&rsaquo;</button></td>
+                                    <td>
+                                        <div class="day-details-content">
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Main Feed Post:</h4>
+                                            <p class="text-sm"><strong>Type:</b> Reel</p>
+                                            <p class="text-sm"><strong>Concept:<b> "Beyond the Project: Local Immersion"</p>
+                                            <p class="text-sm"><strong>Visual:</b> Authentic, candid clips with upbeat, local music.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Global Volunteer isn't just about your project; it's about living like a local, embracing new traditions, and creating lifelong memories. 🍜💃 From street food adventures to cultural festivals, get ready for a truly immersive experience! #CulturalImmersion #LocalLife #AIESEC_Travel #AuthenticExperiences"</p>
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Story 1:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> "Fun Fact Friday"</p>
+                                            <p class="text-sm"><strong>Concept:<b> "Did you know?"</p>
+                                            <p class="text-sm"><strong>Visual:</b> Engaging graphic with a fun fact.</p>
+                                            <p class="text-sm"><strong>Caption:</b> "Test your AIESEC knowledge! 😉"</p>
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Story 2:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> Link Sticker</p>
+                                            <p class="text-sm"><strong>Concept:<b> "Read our blog on cultural immersion"</p>
+                                            <p class="text-sm"><strong>Visual:</b> Visually appealing graphic.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Dive deeper into cultural experiences!"</p>
+                                        </div>
+                                    </td>
+                                    <td>Consideration<br>Awareness & Engagement<br>Consideration</td>
+                                </tr>
+                                <tr>
+                                    <td>**Day 10** <button class="day-details-toggle text-[#1A56DB] text-xl ml-2">&rsaquo;</button></td>
+                                    <td>
+                                        <div class="day-details-content">
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Main Feed Post:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> Static Image</p>
+                                            <p class="text-sm"><strong>Concept:<b> "Financial Aid & Fundraising Tips"</p>
+                                            <p class="text-sm"><strong>Visual:</b> Clean, informative graphic with icons.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Dreaming of #GlobalVolunteer but worried about costs? 🤔 We've got your back! Here are some tips and resources to help you fund your life-changing adventure. Check link in bio for more detailed info! #FundYourDreams #VolunteerBudget #AIESECSupport #FinancialFreedom"</p>
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Story 1:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> "Myth vs. Fact"</p>
+                                            <p class="text-sm"><strong>Concept:<b> "Myth: Global Volunteer is only for rich kids. Fact: We offer resources to help!"</p>
+                                            <p class="text-sm"><strong>Visual:</b> Engaging graphic, clearly distinguishing myth and fact.</p>
+                                            <p class="text-sm"><strong>Caption:</b> "Busting myths about Global Volunteer! 💥"</p>
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Story 2:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> Swipe Up for Info</p>
+                                            <p class="text-sm"><strong>Concept:<b> "Explore funding options for GV."</p>
+                                            <p class="text-sm"><strong>Visual:</b> Engaging text overlay on a relevant image.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Your guide to making GV affordable! Swipe up."</p>
+                                        </div>
+                                    </td>
+                                    <td>Consideration & Conversion<br>Awareness & Consideration<br>Consideration</td>
+                                </tr>
+                                <tr>
+                                    <td>**Day 11** <button class="day-details-toggle text-[#1A56DB] text-xl ml-2">&rsaquo;</button></td>
+                                    <td>
+                                        <div class="day-details-content">
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Main Feed Post:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> Reel</p>
+                                            <p class="text-sm"><strong>Concept:<b> "The AIESEC Global Network"</p>
+                                            <p class="text-sm"><strong>Visual:</b> Montage of global connections, diverse faces, group photos.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "When you join #GlobalVolunteer, you don't just go abroad, you join a global family! 🌍 Forge friendships, build a network, and become part of something bigger. Ready to connect? #AIESECFamily #GlobalNetwork #LifelongFriends #Community"</p>
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Story 1:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> Q&A Sticker</p>
+                                            <p class="text-sm"><strong>Concept:<b> "Ask us about the AIESEC network!"</p>
+                                            <p class="text-sm"><strong>Visual:</b> Visual of a diverse group of young people.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Curious about our global community? Ask away!"</p>
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Story 2:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> Poll</p>
+                                            <p class="text-sm"><strong>Concept:<b> "Are you ready to join a global movement?"</p>
+                                            <p class="text-sm"><strong>Visual:</b> Clear poll with strong visuals.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Your answer could change your life! ✨"</p>
+                                        </div>
+                                    </td>
+                                    <td>Consideration & Awareness<br>Engagement & Consideration<br>Conversion</td>
+                                </tr>
+                                <tr>
+                                    <td>**Day 12** <button class="day-details-toggle text-[#1A56DB] text-xl ml-2">&rsaquo;</button></td>
+                                    <td>
+                                        <div class="day-details-content">
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Main Feed Post:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> Static Image</p>
+                                            <p class="text-sm"><strong>Concept:<b> "Application Process Simplified"</p>
+                                            <p class="text-sm"><strong>Visual:</b> Simple, visually appealing infographic with numbers and icons for each step.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Ready to embark on your #GlobalVolunteer journey? ✨ Here's a simple breakdown of our application process! Don't let anything stop you from making an impact. Link in bio to get started! #ApplyNow #EasySteps #AIESECApplication #YourJourneyStartsHere"</p>
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Story 1:</h4>
+                                            <p class="text-sm"><strong>Type:<b> Quick Tip</p>
+                                            <p class="text-sm"><strong>Concept:<b> "How to write a standout Global Volunteer application."</p>
+                                            <p class="text-sm"><strong>Visual:</b> Text overlay on a branded background.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Make your application shine! ✨"</p>
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Story 2:</h4>
+                                            <p class="text-sm"><strong>Type:<b> Link Sticker</p>
+                                            <p class="text-sm"><strong>Concept:<b> "Start your Global Volunteer application now!"</p>
+                                            <p class="text-sm"><strong>Visual:</b> Direct, clear call to action.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Your adventure awaits! Apply today!"</p>
+                                        </div>
+                                    </td>
+                                    <td>Conversion<br>Consideration & Conversion<br>Conversion</td>
+                                </tr>
+                                <tr>
+                                    <td>**Day 13** <button class="day-details-toggle text-[#1A56DB] text-xl ml-2">&rsaquo;</button></td>
+                                    <td>
+                                        <div class="day-details-content">
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Main Feed Post:</h4>
+                                            <p class="text-sm"><strong>Type:<b> Reel</p>
+                                            <p class="text-sm"><strong>Concept:<b> "The Ripple Effect of Your Impact"</p>
+                                            <p class="text-sm"><strong>Visual:</b> Powerful, emotional reel showing long-term impact on communities and individuals.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Every #GlobalVolunteer experience creates a ripple effect, transforming not just lives abroad, but also your own. 🌱 See the incredible impact you can create. Be the change. #ImpactfulJourney #PositiveChange #AIESECLegacy #VolunteerForChange"</p>
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Story 1:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> Testimonial Reel</p>
+                                            <p class="text-sm"><strong>Concept:<b> Short video clips of multiple volunteers.</p>
+                                            <p class="text-sm"><strong>Visual:</b> Quick cuts of different faces, one word per clip.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "One word to describe Global Volunteer? transformative. incredible. life-changing."</p>
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Story 2:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> Poll</p>
+                                            <p class="text-sm"><strong>Concept:<b> "Are you feeling inspired to make an impact?"</p>
+                                            <p class="text-sm"><strong>Visual:</b> Engaging poll with inspiring visuals.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Let's make a difference, together! 💪"</p>
+                                        </div>
+                                    </td>
+                                    <td>Awareness & Consideration<br>Consideration<br>Engagement & Conversion</td>
+                                </tr>
+                                <tr>
+                                    <td>**Day 14** <button class="day-details-toggle text-[#1A56DB] text-xl ml-2">&rsaquo;</button></td>
+                                    <td>
+                                        <div class="day-details-content">
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Main Feed Post:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> Static Image / Carousel</p>
+                                            <p class="text-sm"><strong>Concept:<b> "Last Chance for Global Volunteer Applications!"</p>
+                                            <p class="text-sm"><strong>Visual:</b> Bold, urgent call to action with a compelling visual.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "THIS IS IT! 🚨 Your final call to join #GlobalVolunteer and embark on the adventure of a lifetime. Applications closing soon! Don't miss your chance to lead, learn, and make an unforgettable impact. Apply NOW via link in bio! #LastChanceGV #AIESECPakistan #YourAdventureAwaits #ActNow"</p>
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Story 1:</h4>
+                                            <p class="text-sm"><strong>Type:</strong> Countdown Sticker</p>
+                                            <p class="text-sm"><strong>Concept:<b> "Applications close today!"</p>
+                                            <p class="text-sm"><strong>Visual:</b> Clear, urgent, visually impactful.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "Don't let this opportunity slip away! ⏳"</p>
+                                            <h4 class="font-semibold text-md mt-2 text-[#0B4F6C]">Story 2:</h4>
+                                            <p class="text-sm"><strong>Type:<b> Link Sticker</p>
+                                            <p class="text-sm"><strong>Concept:<b> "Apply for Global Volunteer NOW!"</p>
+                                            <p class="text-sm"><strong>Visual:</b> Direct, clear call to action.</p>
+                                            <p class="text-sm"><strong>Caption:</strong> "The time is NOW! Click to apply!"</p>
+                                        </div>
+                                    </td>
+                                    <td>Conversion<br>Conversion<br>Conversion</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="flex justify-between mt-8">
+                    <button onclick="showPage('q4q5')" class="bg-[#EF5350] text-white px-6 py-3 rounded-full font-semibold shadow-md hover:opacity-90 transition-opacity duration-300">
+                        &larr; Back
+                    </button>
+                    <button onclick="showPage('q7')" class="bg-[#1A56DB] text-white px-6 py-3 rounded-full font-semibold shadow-md hover:opacity-90 transition-opacity duration-300">
+                        Next: Q7 &rarr;
+                    </button>
+                </div>
+            </section>
+
+            <section id="q7-page" class="page">
+                <div class="card">
+                    <h2 class="text-3xl mb-6 text-center text-[#0B4F6C]">Q7: AIESEC Pakistan Content Hub: Submission & Tracking System</h2>
+                    <p class="text-gray-600 text-center mb-8">To streamline content submission and ensure brand consistency, I propose the **AIESEC Pakistan Content Hub**, built on accessible Google Workspace tools.</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                        <div class="bg-gray-50 p-6 rounded-xl shadow-sm">
+                            <h3 class="font-semibold text-xl text-[#1A56DB] mb-3">System Name:</h3>
+                            <p class="text-lg font-bold text-[#26A69A]">AIESEC Pakistan Content Hub</p>
+                        </div>
+                        <div class="bg-gray-50 p-6 rounded-xl shadow-sm">
+                            <h3 class="font-semibold text-xl text-[#1A56DB] mb-3">Illustrative System Components:</h3>
+                            <ul class="list-disc list-inside text-gray-600 space-y-1">
+                                <li>Master Content Calendar (Google Sheet) - _e.g., docs.google.com/spreadsheets/..._</li>
+                                <li>Content Submission Form (Google Form) - _e.g., forms.gle/..._</li>
+                                <li>Content Asset Drive (Google Drive) - _e.g., drive.google.com/drive/..._</li>
+                                <li>Brand Guidelines Checklist (Google Doc) - _e.g., docs.google.com/document/..._</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="mb-8">
+                        <h3 class="font-semibold text-2xl text-[#0B4F6C] mb-4">How it Works:</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="bg-gray-50 p-6 rounded-xl shadow-sm text-center">
+                                <div class="text-4xl mb-3 text-[#1A56DB]">📅</div>
+                                <h4 class="font-semibold text-lg mb-2">Master Content Calendar</h4>
+                                <p class="text-sm text-gray-600">Central Google Sheet for all national and LC posting slots, minimizing clashes.</p>
+                            </div>
+                            <div class="bg-gray-50 p-6 rounded-xl shadow-sm text-center">
+                                <div class="text-4xl mb-3 text-[#26A69A]">📝</div>
+                                <h4 class="font-semibold text-lg mb-2">Content Submission Form</h4>
+                                <p class="text-sm text-gray-600">Standardized Google Form with content details and a mandatory brand guideline checklist.</p>
+                            </div>
+                            <div class="bg-gray-50 p-6 rounded-xl shadow-sm text-center">
+                                <div class="text-4xl mb-3 text-[#EF5350]">📂</div>
+                                <h4 class="font-semibold text-lg mb-2">Content Asset Drive</h4>
+                                <p class="text-sm text-gray-600">Dedicated Google Drive folder for LCs to upload high-resolution content assets.</p>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 mt-6 text-center">The National Marketing team reviews submissions, updates status in the calendar, and automated notifications (e.g., via Zapier or Google Forms add-ons) inform LCs of their content's status. This minimizes compatibility issues and simplifies training for distributed teams.</p>
+                    </div>
+
+                    <div>
+                        <h3 class="font-semibold text-2xl text-[#0B4F6C] mb-4">How I would Introduce it to LCs:</h3>
+                        <div class="accordion-container space-y-4">
+                            <div class="accordion-item">
+                                <div class="accordion-header">
+                                    <span>1. Pilot Program & Feedback</span>
+                                    <span class="arrow">&#9660;</span>
+                                </div>
+                                <div class="accordion-content">
+                                    <p class="text-gray-700">I would first introduce the system to 2-3 LCs as a pilot program. This allows us to identify any unforeseen issues, gather feedback, and refine the process before a wider launch, ensuring it's truly user-friendly for Pakistani LCs.</p>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <div class="accordion-header">
+                                    <span>2. Comprehensive Training Session (Virtual)</span>
+                                    <span class="arrow">&#9660;</span>
+                                </div>
+                                <div class="accordion-content">
+                                    <p class="text-gray-700">A mandatory virtual training session for all LC Marketing VPs and their relevant team members would cover: the benefits for LCs (clear slots, faster approvals), a live walkthrough of the system, and a deep dive into common brand guideline errors relevant to AIESEC in Pakistan's context.</p>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <div class="accordion-header">
+                                    <span>3. Creation of a "How-To" Guide</span>
+                                    <span class="arrow">&#9660;</span>
+                                </div>
+                                <div class="accordion-content">
+                                    <p class="text-gray-700">A simple, visually appealing Google Doc or PDF guide with screenshots and clear instructions would be created and shared widely for easy reference, adaptable for local nuances.</p>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <div class="accordion-header">
+                                    <span>4. Dedicated Support Channel</span>
+                                    <span class="arrow">&#9660;</span>
+                                </div>
+                                <div class="accordion-content">
+                                    <p class="text-gray-700">Establish a temporary WhatsApp group or a specific email address for LCs to ask questions and get immediate support during the initial rollout phase, considering popular communication methods in Pakistan.</p>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <div class="accordion-header">
+                                    <span>5. Regular Feedback & Iteration</span>
+                                    <span class="arrow">&#9660;</span>
+                                </div>
+                                <div class="accordion-content">
+                                    <p class="text-gray-700">Emphasize that this is a living system. Encourage ongoing feedback from LCs to continuously improve and adapt the process, fostering a sense of ownership and collaboration across Pakistan's diverse LCs.</p>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <div class="accordion-header">
+                                    <span>6. Incentivize Compliance</span>
+                                    <span class="arrow">&#9660;</span>
+                                </div>
+                                <div class="accordion-content">
+                                    <p class="text-gray-700">Potentially introduce a "Star LC" recognition for LCs consistently following guidelines and submitting on time, encouraging positive behavior and healthy competition nationwide.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-between mt-8">
+                    <button onclick="showPage('q6')" class="bg-[#EF5350] text-white px-6 py-3 rounded-full font-semibold shadow-md hover:opacity-90 transition-opacity duration-300">
+                        &larr; Back
+                    </button>
+                    <button onclick="showPage('q8')" class="bg-[#1A56DB] text-white px-6 py-3 rounded-full font-semibold shadow-md hover:opacity-90 transition-opacity duration-300">
+                        Next: Q8 &rarr;
+                    </button>
+                </div>
+            </section>
+
+            <section id="q8-page" class="page">
+                <div class="card">
+                    <h2 class="text-3xl mb-6 text-center text-[#0B4F6C]">Q8: Engaging Gen Z: Instagram Comment Strategy</h2>
+                    <p class="text-gray-600 text-center mb-8">To boost visibility, AIESEC in Pakistan can leave smart, engaging comments under relevant Instagram Reels and creator profiles that resonate with Gen Z. This approach leverages authenticity and broad reach.</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="bg-gray-50 p-6 rounded-xl shadow-sm">
+                            <h3 class="font-semibold text-xl text-[#1A56DB] mb-3 flex items-center">
+                                <span>1. Creator Profile: @shkumar1 (Sheikh Umar Saleem)</span>
+                            </h3>
+                            <p class="text-gray-600 mb-2">**Relevance:** Sheikh Umar Saleem is a popular Pakistani content creator known for relatable humor and observational comedy, which strongly resonates with Gen Z in Pakistan.</p>
+                            <a href="https://www.instagram.com/shkumar1/" target="_blank" class="text-[#1A56DB] hover:underline text-sm block mb-3">View Profile on Instagram</a>
+                            <p class="text-gray-700 font-medium">**Exact Comment:**</p>
+                            <p class="text-gray-600 italic text-sm border-l-4 border-[#26A69A] pl-3 py-1">
+                                "Relatable content! 😂 If you're looking to turn that 'what's next?' into real impact & global adventure, check out Global Volunteer with AIESEC in Pakistan. Grow your leadership, explore the world! Link in bio. #AIESECinPakistan #GlobalVolunteer #MakeAnImpact"
+                            </p>
+                        </div>
+
+                        <div class="bg-gray-50 p-6 rounded-xl shadow-sm">
+                            <h3 class="font-semibold text-xl text-[#1A56DB] mb-3 flex items-center">
+                                <span>2. Creator Profile: @wildlensbyabrar (Abrar Hassan)</span>
+                            </h3>
+                            <p class="text-gray-600 mb-2">**Relevance:** Abrar Hassan is a renowned Pakistani travel vlogger and photographer, inspiring many young Pakistanis with his adventures across the globe and within Pakistan. Appeals to wanderlust and exploration.</p>
+                            <a href="https://www.instagram.com/wildlensbyabrar/" target="_blank" class="text-[#1A56DB] hover:underline text-sm block mb-3">View Profile on Instagram</a>
+                            <p class="text-gray-700 font-medium">**Exact Comment:**</p>
+                            <p class="text-gray-600 italic text-sm border-l-4 border-[#26A69A] pl-3 py-1">
+                                "Amazing travel content! 🌍 If you love exploring, imagine travel with a purpose. Global Volunteer by AIESEC in Pakistan lets you make an impact abroad while building leadership. Your next adventure awaits! Link in bio. #TravelWithPurpose #GlobalVolunteer #AIESECPakistan"
+                            </p>
+                        </div>
+
+                        <div class="bg-gray-50 p-6 rounded-xl shadow-sm">
+                            <h3 class="font-semibold text-xl text-[#1A56DB] mb-3 flex items-center">
+                                <span>3. Creator Profile: @youthimpact.pk (Youth Impact Pakistan)</span>
+                            </h3>
+                            <p class="text-gray-600 mb-2">**Relevance:** Youth Impact Pakistan is an organization focused on empowering youth through various programs, aligning perfectly with AIESEC's mission. This profile reaches a highly engaged audience passionate about social impact and personal development in Pakistan.</p>
+                            <a href="https://www.instagram.com/youthimpact.pk/" target="_blank" class="text-[#1A56DB] hover:underline text-sm block mb-3">View Profile on Instagram</a>
+                            <p class="text-gray-700 font-medium">**Exact Comment:**</p>
+                            <p class="text-gray-600 italic text-sm border-l-4 border-[#26A69A] pl-3 py-1">
+                                "Inspiring work for Pakistan's youth! 👏 If you're passionate about making a tangible difference, AIESEC's Global Volunteer programs let you contribute to SDGs like Quality Education abroad. Turn passion into impact! Link in bio. #SDGs #MakeAnImpact #AIESECPakistan"
+                            </p>
+                        </div>
+
+                        <div class="bg-gray-50 p-6 rounded-xl shadow-sm">
+                            <h3 class="font-semibold text-xl text-[#1A56DB] mb-3 flex items-center">
+                                <span>4. Creator Profile: @pakistan.youth.forum (Pakistan Youth Forum)</span>
+                            </h3>
+                            <p class="text-gray-600 mb-2">**Relevance:** Pakistan Youth Forum is a prominent platform for youth engagement, discussions, and opportunities, appealing to Gen Z interested in social discourse, leadership, and community involvement. This is a highly relevant and active profile for AIESEC's target audience.</p>
+                            <a href="https://www.instagram.com/pakistan.youth.forum/" target="_blank" class="text-[#1A56DB] hover:underline text-sm block mb-3">View Profile on Instagram</a>
+                            <p class="text-gray-700 font-medium">**Exact Comment:**</p>
+                            <p class="text-gray-600 italic text-sm border-l-4 border-[#26A69A] pl-3 py-1">
+                                "Great discussions here! 💪 For young leaders ready to take action beyond dialogue, AIESEC's Global Volunteer programs offer hands-on impact abroad & leadership development. Join a global movement! Link in bio. #YouthLeadership #PakistanYouth #AIESECPakistan"
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-between mt-8">
+                    <button onclick="showPage('q7')" class="bg-[#EF5350] text-white px-6 py-3 rounded-full font-semibold shadow-md hover:opacity-90 transition-opacity duration-300">
+                        &larr; Back
+                    </button>
+                    <button onclick="showPage('home')" class="bg-[#1A56DB] text-white px-6 py-3 rounded-full font-semibold shadow-md hover:opacity-90 transition-opacity duration-300">
+                        Back to Home &rarr;
+                    </button>
+                </div>
+            </section>
+
+        </main>
+
+    </div>
+
+    <script>
+        // Function to wrap long labels for Chart.js
+        const wrapLabel = (label, maxWidth) => {
+            const words = label.split(' ');
+            let lines = [];
+            let currentLine = words[0];
+
+            for (let i = 1; i < words.length; i++) {
+                if (currentLine.length + words[i].length + 1 < maxWidth) {
+                    currentLine += ' ' + words[i];
+                } else {
+                    lines.push(currentLine);
+                    currentLine = words[i];
+                }
+            }
+            lines.push(currentLine);
+            return lines;
+        };
+
+        // Tooltip callback for Chart.js to handle wrapped labels
+        const tooltipTitleCallback = (tooltipItems) => {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            return Array.isArray(label) ? label.join(' ') : label;
+        };
+
+        // Chart.js instance for Q3
+        let journeyChartInstance = null; 
+
+        function initializeJourneyChart() {
+            if (journeyChartInstance) {
+                journeyChartInstance.destroy(); 
+            }
+            const journeyCtx = document.getElementById('journeyAlignmentChart').getContext('2d');
+            journeyChartInstance = new Chart(journeyCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Induction', wrapLabel('Previous NST Role', 16), wrapLabel('This NST Application', 16), wrapLabel('Professional Career Start', 16)],
+                    datasets: [{
+                        label: 'AIESEC Journey Growth',
+                        data: [1, 2, 3.5, 6], /* Adjusted data points */
+                        borderColor: '#1A56DB',
+                        backgroundColor: 'rgba(26, 86, 219, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: 'Professional Skill Alignment',
+                        data: [0.5, 1, 3, 6], /* Adjusted data points */
+                        borderColor: '#26A69A',
+                        backgroundColor: 'rgba(38, 166, 154, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Skill & Experience Level'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                title: tooltipTitleCallback
+                            }
+                        },
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Parallel Growth: AIESEC & Professional Career'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Function to show a specific page and update navigation
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+
+            // Show the requested page
+            const targetPage = document.getElementById(pageId + '-page');
+            if (targetPage) {
+                targetPage.classList.add('active');
+            }
+
+            // Update active state in navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                if (item.dataset.page === pageId) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+
+            // Initialize chart if on Q3 page
+            if (pageId === 'q3') {
+                initializeJourneyChart();
+            }
+        }
+
+        // Accordion functionality for Q7
+        document.querySelectorAll('#q7-page .accordion-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const content = header.nextElementSibling;
+                const arrow = header.querySelector('.arrow');
+
+                content.classList.toggle('active');
+                if (content.classList.contains('active')) {
+                    arrow.innerHTML = '&#9650;'; // Up arrow
+                } else {
+                    arrow.innerHTML = '&#9660;'; // Down arrow
+                }
+            });
+        });
+
+        // Calendar Day Details Toggle (Q6)
+        document.querySelectorAll('#q6-page .day-details-toggle').forEach(button => {
+            button.addEventListener('click', () => {
+                // Find the closest parent <tr> then its next sibling (which is the td containing the content)
+                const row = button.closest('tr');
+                const contentCell = row.querySelector('.day-details-content');
+                
+                button.classList.toggle('rotated');
+                contentCell.classList.toggle('active');
+            });
+        });
+        
+        // Initial page load
+        document.addEventListener('DOMContentLoaded', () => {
+            showPage('home'); 
+        });
+
+        // Event listeners for navigation items
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                showPage(item.dataset.page);
+            });
+        });
+    </script>
+</body>
+</html>
